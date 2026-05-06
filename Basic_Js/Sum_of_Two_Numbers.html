@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sum of Two Numbers</title>
+</head>
+<body>
+    <h2>Find Sum</h2>
+    <input type="number" id="a" placeholder="First number">
+    <input type="number" id="b" placeholder="Second number">
+    <button onclick="findSum()">Calculate</button>
+    <p id="sumResult"></p>
+
+    <script>
+        function findSum() {
+            let a = parseFloat(document.getElementById("a").value);
+            let b = parseFloat(document.getElementById("b").value);
+            document.getElementById("sumResult").innerHTML = "Sum = " + (a + b);
+        }
+    </script>
+</body>
+</html>

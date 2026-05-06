@@ -1,0 +1,142 @@
+[
+  {
+    "bag": 1,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-1.png"
+  },
+  {
+    "bag": 2,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-2.png"
+  },
+  {
+    "bag": 3,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-3.png"
+  },
+  {
+    "bag": 4,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-2.png"
+  },
+  {
+    "bag": 5,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-1.png"
+  },
+  {
+    "bag": 6,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-2.png"
+  },
+  {
+    "bag": 7,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-3.png"
+  },
+  {
+    "bag": 8,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-1.png"
+  },
+  {
+    "bag": 9,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-2.png"
+  },
+  {
+    "bag": 10,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-2.png"
+  },
+  {
+    "bag": 11,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-3.png"
+  },
+  {
+    "bag": 12,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-1.png"
+  },
+  {
+    "bag": 13,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-2.png"
+  },
+  {
+    "bag": 14,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-2.png"
+  },
+  {
+    "bag": 15,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-3.png"
+  },
+  {
+    "bag": 16,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-2.png"
+  },
+  {
+    "bag": 17,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-3.png"
+  },
+  {
+    "bag": 18,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-2.png"
+  },
+  {
+    "bag": 19,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-2.png"
+  },
+  {
+    "bag": 20,
+    "productName": "Biaowang Backpack",
+    "Description": "A card component has a figure, a body part, and inside body there are title and actions parts",
+    "price": "$1009",
+    "imageURL": "./assets/images/bags/bag-1.png"
+  }
+]

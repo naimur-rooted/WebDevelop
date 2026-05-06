@@ -1,0 +1,142 @@
+[
+  {
+    "product": 1,
+    "productName": "Nike Air Max 90",
+    "Description": "A classic running shoe with visible Air cushioning. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$120",
+    "imageURL": "./assets/images/shoes/shoe-1.png"
+  },
+  {
+    "product": 2,
+    "productName": "Adidas Ultraboost 22",
+    "Description": "High-performance running shoe known for its energy return and comfortable fit. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$190",
+    "imageURL": "./assets/images/shoes/shoe-2.png"
+  },
+  {
+    "product": 3,
+    "productName": "Converse Chuck Taylor All Star",
+    "Description": "The iconic high-top canvas sneaker, perfect for casual wear. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$60",
+    "imageURL": "./assets/images/shoes/shoe-3.png"
+  },
+  {
+    "product": 4,
+    "productName": "Vans Old Skool",
+    "Description": "A low-top, lace-up shoe featuring sturdy canvas and suede uppers, re-enforced toe caps. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$75",
+    "imageURL": "./assets/images/shoes/shoe-2.png"
+  },
+  {
+    "product": 5,
+    "productName": "Timberland 6-Inch Premium Boot",
+    "Description": "Waterproof leather boot designed for durability and comfort in harsh weather. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$180",
+    "imageURL": "./assets/images/shoes/shoe-1.png"
+  },
+  {
+    "product": 6,
+    "productName": "New Balance 990v5",
+    "Description": "A premium lifestyle and performance running shoe with superior cushioning. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$175",
+    "imageURL": "./assets/images/shoes/shoe-3.png"
+  },
+  {
+    "product": 7,
+    "productName": "Reebok Pump Omni Zone II",
+    "Description": "Retro basketball shoe featuring the customizable Pump technology for a locked-in feel. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$160",
+    "imageURL": "./assets/images/shoes/shoe-3.png"
+  },
+  {
+    "product": 8,
+    "productName": "Dr. Martens 1460 Smooth Leather Boot",
+    "Description": "The original 8-eye boot, recognized for its durability and comfortable air-cushioned sole. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$150",
+    "imageURL": "./assets/images/shoes/shoe-1.png"
+  },
+  {
+    "product": 9,
+    "productName": "Puma Suede Classic",
+    "Description": "An iconic lifestyle sneaker with a full suede upper and classic basket silhouette. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$70",
+    "imageURL": "./assets/images/shoes/shoe-2.png"
+  },
+  {
+    "product": 10,
+    "productName": "ASICS GEL-Kayano 28",
+    "Description": "Stability running shoe providing excellent support and cushioning for long-distance runs. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$160",
+    "imageURL": "./assets/images/shoes/shoe-2.png"
+  },
+  {
+    "product": 11,
+    "productName": "Salomon Speedcross 5",
+    "Description": "An aggressive trail running shoe with deep, multi-directional lugs for maximum grip. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$140",
+    "imageURL": "./assets/images/shoes/shoe-3.png"
+  },
+  {
+    "product": 12,
+    "productName": "Clarks Desert Boot",
+    "Description": "A timeless ankle boot made from quality suede or leather, known for its crepe sole. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$130",
+    "imageURL": "./assets/images/shoes/shoe-1.png"
+  },
+  {
+    "product": 13,
+    "productName": "Crocs Classic Clog",
+    "Description": "Lightweight, water-friendly, and famously comfortable slip-on shoe. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$50",
+    "imageURL": "./assets/images/shoes/shoe-2.png"
+  },
+  {
+    "product": 14,
+    "productName": "Under Armour Flow Velociti SE",
+    "Description": "A lightweight and versatile running shoe designed for responsiveness and speed. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$130",
+    "imageURL": "./assets/images/shoes/shoe-1.png"
+  },
+  {
+    "product": 15,
+    "productName": "Mizuno Wave Rider 25",
+    "Description": "A neutral running shoe that offers a great balance of cushioning and responsive ride. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$145",
+    "imageURL": "./assets/images/shoes/shoe-3.png"
+  },
+  {
+    "product": 16,
+    "productName": "Hoka One One Clifton 8",
+    "Description": "A road running shoe known for its signature maximal cushioning and smooth ride. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$140",
+    "imageURL": "./assets/images/shoes/shoe-1.png"
+  },
+  {
+    "product": 17,
+    "productName": "Skechers Go Walk 6",
+    "Description": "Comfort-focused walking shoe featuring ultra-lightweight and responsive cushioning. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$85",
+    "imageURL": "./assets/images/shoes/shoe-2.png"
+  },
+  {
+    "product": 18,
+    "productName": "Johnston & Murphy Oxford Cap Toe",
+    "Description": "A classic leather dress shoe suitable for formal and business attire. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$199",
+    "imageURL": "./assets/images/shoes/shoe-3.png"
+  },
+  {
+    "product": 19,
+    "productName": "Birkenstock Arizona Sandals",
+    "Description": "Two-strap comfort sandal with an anatomically shaped cork-latex footbed. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$110",
+    "imageURL": "./assets/images/shoes/shoe-1.png"
+  },
+  {
+    "product": 20,
+    "productName": "Gucci Ace Embroidered Sneaker",
+    "Description": "Luxury leather sneaker featuring iconic brand embellishments and detailing. A card component has a figure, a body part, and inside body there are title and actions parts.",
+    "price": "$790",
+    "imageURL": "./assets/images/shoes/shoe-2.png"
+  }
+]

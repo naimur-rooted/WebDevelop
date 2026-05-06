@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>City University Portal</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      background-color: pink; /* Header color */
+      text-align: center;
+      padding: 30px;
+    }
+    .container {
+      display: flex;
+    }
+    nav {
+      width: 200px;
+      background-color: yellow; /* Sidebar color */
+      padding: 20px;
+    }
+    nav a {
+      display: block;
+      margin: 10px 0;
+      text-decoration: none;
+      color: black;
+      font-weight: bold;
+    }
+    main {
+      flex: 1;
+      padding: 20px;
+      background-color: rgb(105, 146, 235); /* Main content color */
+      color: white;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      color: black;
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: center;
+    }
+    footer {
+      background-color: rgb(79, 75, 75); /* Footer color */
+      color: white;
+      text-align: center;
+      padding: 15px;
+    }
+    footer img {
+      height: 40px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>City University Portal</h1>
+    <p>Md. Naimur Rahman Nahid</p>
+  </header>
+
+  <div class="container">
+    <nav>
+      <a href="home.html">Home</a>
+      <a href="students.html">Students</a>
+      <a href="result.html">Result</a>
+      <a href="notice.html">Notice</a>
+    </nav>
+
+    <main>
+      <h2 style="color:black"> Student Information </h2>
+      <table>
+        <tr>
+          <th>Std Name</th>
+          <th>ID</th>
+          <th>Dept</th>
+        </tr>
+        <tr>
+          <td>MD. Naimur Rahman </td>
+          <td>5101016</td>
+          <!-- Dept column merged -->
+          <td rowspan="3">CSE</td>
+        </tr>
+        <tr>
+          <td>Robiul Islam</td>
+          <td>5101017</td>
+        </tr>
+        <tr>
+          <td>Tonmoy</td>
+          <td>5101018</td>
+        </tr>
+      </table>
+    </main>
+  </div>
+
+  <footer>
+    <p>Copy Right @ City University</p>
+    <img src="CityU_Logo.png" alt="City University Logo">
+  </footer>
+</body>
+</html>

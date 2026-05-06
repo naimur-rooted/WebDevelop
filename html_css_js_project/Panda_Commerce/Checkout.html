@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panda E-Commerce - Cart</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: 100px 1fr 120px 100px 40px;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item img {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .cart-item h4 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .price {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .qty input {
+            width: 60px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .remove {
+            cursor: pointer;
+            font-size: 20px;
+            color: red;
+        }
+
+        .total-section {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .total-section h3 {
+            font-size: 22px;
+        }
+
+        .btn-checkout {
+            padding: 14px 20px;
+            background: #00a86b;
+            color: #fff;
+            border: none;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-checkout:hover {
+            background: #008c59;
+        }
+
+        @media (max-width: 768px) {
+            .cart-item {
+                grid-template-columns: 80px 1fr 80px;
+                grid-template-rows: auto auto;
+            }
+            .price, .qty, .remove {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Your Cart</h2>
+
+        <!-- Cart Items -->
+        <div id="cart-list"></div>
+
+        <!-- Cart Total -->
+        <div class="total-section">
+            <h3>Total: <span id="total">৳0</span></h3>
+            <button class="btn-checkout" onclick="goCheckout()">Proceed to Checkout</button>
+        </div>
+    </div>
+
+
+    <script>
+    // Default 4 products in the cart
+    let cart = [
+        {
+            id: 1,
+            name: "Ison Backpack",
+            price: 850,
+            qty: 1,
+            img: "./assets/images/bags/bag-1.png"
+        },
+        {
+            id: 2,
+            name: "Reebok All Terrain",
+            price: 450,
+            qty: 1,
+            img: "./assets/images/shoes/shoe-2.png"
+        },
+        {
+            id: 3,
+            name: "Smart Watch",
+            price: 1990,
+            qty: 1,
+            img: "./assets/images/categories/watch.png"
+        },
+        {
+            id: 4,
+            name: "Biaowang Backpack",
+            price: 550,
+            qty: 1,
+            img: "./assets/images/bags/bag-3.png"
+        }
+    ];
+
+    function loadCart() {
+        const cartList = document.getElementById("cart-list");
+        cartList.innerHTML = "";
+
+        cart.forEach((item, index) => {
+            cartList.innerHTML += `
+                <div class="cart-item">
+                    <img src="${item.img}" />
+
+                    <div>
+                        <h4>${item.name}</h4>
+                        <small>ID: ${item.id}</small>
+                    </div>
+
+                    <div class="price">$${item.price}</div>
+
+                    <div class="qty">
+                        <input type="number" min="1" value="${item.qty}" onchange="updateQty(${index}, this.value)" />
+                    </div>
+
+                    <div class="remove" onclick="removeItem(${index})">✖</div>
+                </div>
+            `;
+        });
+
+        calculateTotal();
+    }
+
+    function updateQty(index, qty) {
+        cart[index].qty = parseInt(qty);
+        calculateTotal();
+    }
+
+    function removeItem(index) {
+        if (confirm("Remove this item?")) {
+            cart.splice(index, 1);
+            loadCart();
+        }
+    }
+
+    function calculateTotal() {
+        let total = 0;
+        cart.forEach(item => {
+            total += item.price * item.qty;
+        });
+        document.getElementById("total").innerText = "$" + total;
+    }
+
+    function goCheckout() {
+        window.location.href = "checkout.html";
+    }
+
+    loadCart();
+</script>
+
+
+</body>
+</html>

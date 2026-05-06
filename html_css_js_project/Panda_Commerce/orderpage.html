@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Confirm Order - Panda E-Commerce</title>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: 30px auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h2 {
+        margin-bottom: 20px;
+      }
+
+      .checkout-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 25px;
+      }
+
+      .card {
+        background: #fafafa;
+        padding: 20px;
+        border-radius: 8px;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 12px;
+        margin-top: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 15px;
+      }
+
+      .order-summary {
+        border-left: 3px solid #00a86b;
+      }
+
+      .summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 14px;
+        background: #00a86b;
+        color: #fff;
+        font-weight: bold;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      .btn:hover {
+        background: #008c59;
+      }
+
+      @media (max-width: 768px) {
+        .checkout-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Confirm Order</h2>
+
+      <div class="checkout-grid">
+        <!-- Customer Info -->
+        <div>
+          <div class="card">
+            <h3>Customer Information</h3>
+            <input type="text" id="name" placeholder="Full Name" required />
+            <input
+              type="email"
+              id="email"
+              placeholder="Email Address"
+              required
+            />
+            <input type="text" id="phone" placeholder="Phone Number" required />
+          </div>
+
+          <div class="card" style="margin-top: 20px">
+            <h3>Shipping Address</h3>
+            <input
+              type="text"
+              id="address"
+              placeholder="Address Line"
+              required
+            />
+            <input type="text" id="city" placeholder="City" required />
+            <input type="text" id="postal" placeholder="Postal Code" required />
+
+            <select id="country">
+              <option value="">Select Country</option>
+              <option value="Bangladesh">Bangladesh</option>
+              <option value="India">India</option>
+              <option value="USA">USA</option>
+            </select>
+          </div>
+
+          <div class="card" style="margin-top: 20px">
+            <h3>Payment Method</h3>
+
+            <select id="payment">
+              <option value="">Select Payment Method</option>
+              <option value="COD">Cash on Delivery</option>
+              <option value="Bkash">bKash</option>
+              <option value="Nagad">Nagad</option>
+              <option value="Card">Credit/Debit Card</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="card order-summary">
+          <h3>Order Summary</h3>
+
+          <div class="summary-item">
+            <span>Subtotal:</span>
+            <strong id="subtotal">৳0</strong>
+          </div>
+
+          <div class="summary-item">
+            <span>Shipping:</span>
+            <strong id="shipping">৳60</strong>
+          </div>
+
+          <hr />
+
+          <div class="summary-item" style="font-size: 18px">
+            <span>Total:</span>
+            <strong id="total">৳0</strong>
+          </div>
+
+          <button class="btn" onclick="placeOrder()">Place Order</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Example cart data (replace with real data)
+      let subtotal = 1200; // Example: total cart price
+
+      document.getElementById("subtotal").innerText = "৳" + subtotal;
+
+      let shipping = 60;
+      document.getElementById("total").innerText = "৳" + (subtotal + shipping);
+
+      function placeOrder() {
+        const name = document.getElementById("name").value;
+        const phone = document.getElementById("phone").value;
+        const address = document.getElementById("address").value;
+
+        if (!name || !phone || !address) {
+          alert("Please fill all required fields.");
+          return;
+        }
+
+        alert("Order placed successfully!");
+      }
+    </script>
+  </body>
+</html>

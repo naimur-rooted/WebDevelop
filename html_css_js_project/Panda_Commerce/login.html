@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+
+    <!-- daisy ui cdn -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@5"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <link rel="stylesheet" href="./style/style.css" />
+  </head>
+  <body>
+    <!-- nav bar -->
+    <nav class="container border-b border-pink-500">
+      <figure>
+        <img src="./assets/images/logo.png" alt="logo" />
+      </figure>
+    </nav>
+    <div class="flex justify-center mt-[50px]">
+      <fieldset
+        class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
+      >
+        <legend class="fieldset-legend">Login</legend>
+
+        <label class="label">Email</label>
+        <input id="email" type="email" class="input" placeholder="Email" />
+
+        <label class="label">Password</label>
+        <input
+          id="password"
+          type="password"
+          class="input"
+          placeholder="Password"
+        />
+
+        <button id="login-btn" class="btn btn-neutral mt-4">Login</button>
+      </fieldset>
+    </div>
+
+
+    <script src="login.js"></script>
+  </body>
+</html>

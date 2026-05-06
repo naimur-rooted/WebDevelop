@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circle Cercumference</title>
+</head>
+
+<body>
+    <h2>Finding Circle Cercumference</h2>
+
+<input type="number" id="radius" placeholder="Enter Radius">
+<button onclick="calculate()">Calculate</button>
+<P id="result"></P>
+
+<script>
+    function calculate(){
+        var r = document.getElementById("radius").value;
+        var c = 2*Math.PI*r;
+        document.getElementById("result").innerHTML= "Cicumference:  "+ c;
+    }
+</script>
+
+</body>
+</html>

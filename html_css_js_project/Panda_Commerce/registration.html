@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Regisration Page</title>
+
+    <!-- google fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- daisy ui cdn -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@5"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- css -->
+    <link rel="stylesheet" href="./style/style.css" />
+  </head>
+  <body>
+    <!-- nav bar -->
+    <nav class="container border-b border-pink-500">
+      <figure>
+        <img src="./assets/images/logo.png" alt="logo" />
+      </figure>
+      <button id="login-button" class="btn btn-active btn-secondary">Login</button>
+    </nav>
+    <!-- registration page -->
+    <div class="flex justify-center mt-[50px]">
+      <fieldset
+        class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
+      >
+        <legend class="fieldset-legend">Registration</legend>
+
+        <label class="label">Name</label>
+        <input id="name" type="text" class="input" placeholder="Your Name" />
+
+        <label class="label">Email</label>
+        <input id="email" class="input" placeholder="Email" />
+
+        <label class="label">Password</label>
+        <input id="password" type="password" class="input" placeholder="Password" />
+
+        <label class="label">Confirm Password</label>
+        <input id="confirm-password" type="password" class="input" placeholder="Password" />
+
+        <button id="registration-btn" class="btn btn-neutral mt-4">Regisration</button>
+      </fieldset>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

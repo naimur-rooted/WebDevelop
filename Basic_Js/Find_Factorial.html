@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Factorial</title>
+</head>
+<body>
+    <h2>Find Factorial</h2>
+    <input type="number" id="factNum" placeholder="Enter a number">
+    <button onclick="findFactorial()">Calculate</button>
+    <p id="factResult"></p>
+
+    <script>
+        function findFactorial() {
+            let n = parseInt(document.getElementById("factNum").value);
+            let fact = 1;
+            for (let i = 1; i <= n; i++) {
+                fact *= i;
+            }
+            document.getElementById("factResult").innerHTML = "Factorial = " + fact;
+        }
+    </script>
+</body>
+</html>
