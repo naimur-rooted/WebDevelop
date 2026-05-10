@@ -1,0 +1,64 @@
+/* Basic style.css */
+
+/* Page layout */
+body {
+  font-family: Arial, sans-serif;
+  margin: 40px;
+}
+
+/* Headings */
+h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+/* Links */
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Table */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 20px;
+}
+
+th, td {
+  border: 1px solid #000;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  font-weight: bold;
+}
+
+/* Form */
+form {
+  margin-top: 20px;
+}
+
+input[type="text"],
+input[type="email"] {
+  width: 100%;
+  padding: 6px;
+  margin-bottom: 10px;
+  border: 1px solid #000;
+  border-radius: 4px;
+}
+
+input[type="submit"] {
+  padding: 8px 16px;
+  border: 1px solid #000;
+  background: none;
+  cursor: pointer;
+}
+
+input[type="submit"]:hover {
+  background: #eee;
+}
