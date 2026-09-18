@@ -13,6 +13,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "db:init": "node scripts/init-db.mjs",
+    "db:check": "node scripts/check-db-config.mjs --probe",
     "api:check": "node scripts/check-api.mjs"
   },
   "dependencies": {

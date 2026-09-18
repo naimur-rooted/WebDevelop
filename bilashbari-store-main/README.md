@@ -160,17 +160,30 @@ npm run api:check -- https://<your-app>.vercel.app
 
 `GET /api/health` should return `{"ok":true,"db":{"ok":true}}`. A `db.ok:false`
 value tells you the DB credentials are wrong or the host is unreachable, without
-needing the Vercel logs.
+needing the Vercel logs. To check the same settings from your own machine first:
+
+```bash
+npm run db:check    # prints the resolved host/port/db and probes the connection
+```
+
+`npm run db:check` loads `.env` then `backend/.env`, so `npm run db:check` tells you
+exactly what `backend/db.js` will use at runtime — useful for spotting a `DB_HOST`
+that is still a loopback address.
 
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
-| `connect ECONNREFUSED 127.0.0.1:3306` | `DB_HOST` missing/unreadable, so `mysql2` falls back to `localhost` | Set `DB_HOST` (and friends) in Vercel env vars, then **redeploy** |
+| `connect ECONNREFUSED 127.0.0.1:3306` | `DB_HOST` missing in the deployment, so `mysql2` falls back to `localhost` | Set `DB_HOST` (and friends) in Vercel env vars, then **redeploy** |
 | `504` on `/api/products`, `/api/categories` | async handler rejection was never forwarded to Express (older code); fixed by the `asyncSafe` wrapper in `backend/server.js` | update + redeploy |
-| `503 Database unavailable (ECONNREFUSED)` | Correct: the API failed fast and told you the DB is unreachable | check `DB_HOST` + DB firewall |
+| `503 Database unavailable (ECONNREFUSED)` | Correct: the API failed fast and told you the DB is unreachable instead of hanging until the 10s function timeout | check `DB_HOST` + the DB firewall/allowlist |
 | `API returned a non-JSON response (HTTP 404)` | Request never reached Express (rewrite/Root Directory wrong) | verify `vercel.json` rewrites and Root Directory |
+| `API returned a non-JSON response (HTTP 500)` | The `/api` function crashed before Express replied (usually a bad env var) | check `JWT_SECRET` is set, then the function logs |
 | Register works but `/admin` rejects you | account `role` is `user` | `UPDATE users SET role='admin' WHERE email='you@example.com';` |
+
+Status codes the API uses on purpose: `400` missing fields, `401` bad credentials/token,
+`403` not an admin, `404` unknown route, `409` email already used, **`503` database
+unreachable**, `500` unexpected error.
 
 ## Notes for public repos
 
