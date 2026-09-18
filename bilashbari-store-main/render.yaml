@@ -1,0 +1,56 @@
+# One blueprint file for BOTH services. Render reads this on "New -> Blueprint".
+# Storage note: do NOT create a Render Postgres/Key Value instance - this
+# project uses external MySQL (Aiven). Only the two services below are needed.
+services:
+  # ---------------------------------------------------------------- API -----
+  - type: web
+    name: bilashbari-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    plan: free
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        value: bilashbari
+      - key: DB_SSL
+        value: "true"
+      - key: DB_SSL_NO_VERIFY
+        value: "true"
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+
+  # ----------------------------------------------------------- Frontend -----
+  - type: web
+    name: bilashbari-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    pullRequestPreviewsEnabled: true
+    envVars:
+      # Value = the bilashbari-api service's public URL + /api
+      - key: VITE_API_URL
+        sync: false
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+    routes:
+      # SPA catch-all: every deep link (e.g. /products/3) serves index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html

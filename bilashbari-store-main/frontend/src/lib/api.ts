@@ -1,14 +1,21 @@
 function resolveApiBase(): string {
   const fromEnv = (import.meta as any).env?.VITE_API_URL as string | undefined;
   if (fromEnv && fromEnv.trim()) return fromEnv.replace(/\/$/, "");
-  // In production (Vercel) the Express app lives on the same deployment at /api.
-  // Defaulting to "/api" instead of localhost fixes "Failed to fetch" after deploy
-  // even if VITE_API_URL was not baked in at build time.
-  if (typeof window !== "undefined") {
-    const host = window.location.hostname;
-    if (host !== "localhost" && host !== "127.0.0.1") return "/api";
-  }
-  return "http://localhost:5000/api";
+
+  const host = typeof window !== "undefined" ? window.location.hostname : "";
+  const isLocal = host === "localhost" || host === "127.0.0.1" || host === "";
+
+  // Dev without a build step: the Express backend runs on :5000 (npm run dev
+  // inside backend/). On the deployed static site the API lives on Render,
+  // so VITE_API_URL MUST be set at build time (Render -> Environment).
+  if (isLocal) return "http://localhost:5000/api";
+
+  console.error(
+    "VITE_API_URL is not set. The static site does not know where the API is. " +
+      "Set it to your backend URL (e.g. https://bilashbari-api.onrender.com/api) " +
+      "in the hosting provider's environment variables and rebuild.",
+  );
+  return "/api";
 }
 
 const API = resolveApiBase();

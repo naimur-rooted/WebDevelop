@@ -307,7 +307,48 @@ const DB_ERROR_CODES = new Set([
   "ER_BAD_DB_ERROR",
   "ER_BAD_HOST_ERROR",
   "POOL_CLOSED",
+  // TLS negotiation with the database failed.
+  "HANDSHAKE_SSL_ERROR",
+  "HANDSHAKE_NO_SSL_SUPPORT",
+  "ERR_TLS_CERT_ALTNAME_INVALID",
+  "SELF_SIGNED_CERT_IN_CHAIN",
+  "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
 ]);
+
+/** Per-code guidance so the response says what to change, not just what broke. */
+function dbErrorHint(code, message) {
+  const missing = ["DB_HOST", "DB_USER", "DB_NAME"].filter((k) => !process.env[k]);
+  if (missing.length) {
+    return `Missing environment variable(s): ${missing.join(", ")}. Set them in Vercel > Project > Settings > Environment Variables and redeploy.`;
+  }
+  switch (code) {
+    case "HANDSHAKE_SSL_ERROR":
+    case "SELF_SIGNED_CERT_IN_CHAIN":
+    case "UNABLE_TO_VERIFY_LEAF_SIGNATURE":
+    case "ERR_TLS_CERT_ALTNAME_INVALID":
+      return (
+        "TLS handshake failed: this server's certificate chain is not trusted by Node " +
+        "(managed providers like Aiven use their own CA). Set DB_SSL_NO_VERIFY=true to skip " +
+        "verification, or paste the provider's CA certificate into DB_SSL_CA to keep it."
+      );
+    case "HANDSHAKE_NO_SSL_SUPPORT":
+      return "The server refused TLS. Remove DB_SSL=true (and any ssl-mode=REQUIRED on MYSQL_URL).";
+    case "ER_ACCESS_DENIED_ERROR":
+      return (
+        "Credentials rejected. Re-copy DB_USER/DB_PASSWORD (the provider console can reset the " +
+        "password) and make sure the user is allowed to connect from this network."
+      );
+    case "ER_BAD_DB_ERROR":
+      return `The database "${process.env.DB_NAME || "?"}" does not exist. Run "npm run db:init", or set DB_NAME to an existing database.`;
+    case "ENOTFOUND":
+      return "The hostname does not resolve. Some providers publish an internal-only host - use the public one.";
+    default:
+      if (/self[- ]signed|certificate/i.test(String(message))) {
+        return "TLS certificate rejected. Set DB_SSL_NO_VERIFY=true, or supply the provider's CA via DB_SSL_CA.";
+      }
+      return "Check DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_NAME in the deployment environment variables.";
+  }
+}
 
 // eslint-disable-next-line no-unused-vars -- Express identifies error middleware by arity
 app.use((err, _req, res, _next) => {
@@ -315,14 +356,9 @@ app.use((err, _req, res, _next) => {
   const code = err?.code || "";
   if (err?.fatal || DB_ERROR_CODES.has(code)) {
     console.error("[api] database error:", code || err?.message);
-    const missing = ["DB_HOST", "DB_USER", "DB_NAME"].filter((k) => !process.env[k]);
-    const hint = missing.length
-      ? `Missing environment variable(s): ${missing.join(", ")}. Set them in Vercel > Project > Settings > Environment Variables and redeploy.`
-      : "Check DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_NAME in the deployment environment variables.";
     return res.status(503).json({
-      error: `Database unavailable (${code || err?.message}). ${hint}`,
+      error: `Database unavailable (${code || err?.message}). ${dbErrorHint(code, err?.message)}`,
       code: code || undefined,
-      missing: missing.length ? missing : undefined,
     });
   }
   console.error("[api] unhandled error:", err);

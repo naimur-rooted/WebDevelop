@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import mysql from "mysql2/promise";
 import "dotenv/config";
 
@@ -16,14 +17,18 @@ function configFromUrl(raw) {
       throw new Error(`unsupported protocol "${url.protocol}" (expected mysql://)`);
     }
     const sslMode = (url.searchParams.get("ssl-mode") || url.searchParams.get("sslmode") || "")
-      .toLowerCase();
+      .toLowerCase()
+      .replace(/_/g, "-");
     return {
       host: url.hostname,
       port: Number(url.port) || 3306,
       user: decodeURIComponent(url.username) || "root",
       password: decodeURIComponent(url.password),
       database: decodeURIComponent(url.pathname.replace(/^\//, "")) || "bilashbari",
-      wantsSsl: sslMode.includes("required") || sslMode.includes("require"),
+      // MySQL client semantics: REQUIRED/PREFERRED encrypt without validating the
+      // certificate, VERIFY_CA and VERIFY_IDENTITY validate it.
+      wantsSsl: sslMode !== "" && sslMode !== "disabled",
+      verify: sslMode.startsWith("verify"),
     };
   } catch (e) {
     console.error(`[db] could not parse MYSQL_URL/DATABASE_URL: ${e.message}`);
@@ -31,13 +36,45 @@ function configFromUrl(raw) {
   }
 }
 
-// DB_SSL=true (or ?ssl-mode=REQUIRED on the URL) enables TLS. Managed providers
-// commonly use a certificate chain Node does not trust by default.
-function sslOption(urlWantsSsl) {
+/**
+ * DB_SSL_CA may be a path to a .pem file or the PEM text itself. Dashboards often
+ * store pasted newlines as a literal "\n", so normalise that.
+ */
+function loadCa() {
+  const raw = process.env.DB_SSL_CA;
+  if (!raw) return undefined;
+  if (raw.includes("-----BEGIN")) return raw.replace(/\\n/g, "\n");
+  try {
+    return fs.readFileSync(raw, "utf8");
+  } catch (e) {
+    console.error(`[db] DB_SSL_CA points at "${raw}" but it could not be read: ${e.message}`);
+    return undefined;
+  }
+}
+
+/**
+ * TLS is enabled by DB_SSL=true or by any ssl-mode in a connection URL.
+ *
+ * Managed providers (Aiven, TiDB, ...) commonly present a chain ending in a CA
+ * that Node does not ship with, which fails as
+ *   HANDSHAKE_SSL_ERROR: self-signed certificate in certificate chain
+ * Two ways out: paste the provider's CA into DB_SSL_CA (keeps verification on),
+ * or set DB_SSL_NO_VERIFY=true to skip verification for that one connection.
+ *
+ * Precedence: an explicit CA is always validated, then DB_SSL_NO_VERIFY, then the
+ * URL's ssl-mode, and finally plain DB_SSL=true which means "verify".
+ */
+function sslOption(fromUrl) {
   const flag = String(process.env.DB_SSL || "").toLowerCase();
-  const enabled = urlWantsSsl || ["1", "true", "yes", "require", "required"].includes(flag);
-  if (!enabled) return undefined;
-  return { rejectUnauthorized: String(process.env.DB_SSL_NO_VERIFY || "") === "true" ? false : true };
+  const enabled = !!fromUrl?.wantsSsl || ["1", "true", "yes", "require", "required"].includes(flag);
+  const ca = loadCa();
+  if (!enabled && !ca) return undefined;
+
+  const noVerify = ["1", "true", "yes"].includes(
+    String(process.env.DB_SSL_NO_VERIFY || "").toLowerCase(),
+  );
+  const rejectUnauthorized = ca ? true : noVerify ? false : (fromUrl?.verify ?? true);
+  return { rejectUnauthorized, ...(ca ? { ca } : {}) };
 }
 
 /**
@@ -55,7 +92,7 @@ export function poolConfig() {
     database: process.env.DB_NAME,
   };
 
-  const ssl = sslOption(fromUrl?.wantsSsl);
+  const ssl = sslOption(fromUrl);
 
   return {
     host: explicit.host || fromUrl?.host || "localhost",
