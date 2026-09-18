@@ -3,11 +3,27 @@ import cors from "cors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
-import { pool } from "./db.js";
+import { pool, dbStatus } from "./db.js";
 import { auth, adminOnly } from "./middleware/auth.js";
 
 const app = express();
-app.get("/api/health", (_req, res) => res.json({ ok: true }));
+
+// Express 4 does not forward rejected promises from async route handlers to the
+// error middleware, so a failing query kept the request open until Vercel's
+// function timeout killed it (the browser only saw a 504). Wrap every handler so
+// rejections reach the error middleware at the bottom of this file. Registered
+// before any route so nothing is missed.
+const asyncSafe = (handler) =>
+  typeof handler !== "function" || handler.length >= 4
+    ? handler
+    : (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
+
+for (const method of ["get", "post", "put", "patch", "delete", "all"]) {
+  const original = app[method].bind(app);
+  app[method] = (path, ...handlers) => original(path, ...handlers.map(asyncSafe));
+}
+
+app.get("/api/health", async (_req, res) => res.json({ ok: true, db: await dbStatus(), vercel: !!process.env.VERCEL }));
 app.use(cors({ origin: process.env.CORS_ORIGIN?.split(",") || "*" }));
 app.use(express.json());
 
@@ -22,7 +38,7 @@ const sign = (u) => {
 };
 
 // ---------- Auth ----------
-app.post("/api/auth/register", async (req, res) => {
+app.post("/api/auth/register", async (req, res, next) => {
   const { name, email, password } = req.body || {};
   if (!name || !email || !password) return res.status(400).json({ error: "Missing fields" });
   try {
@@ -35,7 +51,8 @@ app.post("/api/auth/register", async (req, res) => {
     res.json({ token: sign(user), user });
   } catch (e) {
     if (e.code === "ER_DUP_ENTRY") return res.status(409).json({ error: "Email already used" });
-    res.status(500).json({ error: e.message });
+    // Let the error middleware translate DB/JWT failures into a clear response.
+    next(e);
   }
 });
 
@@ -248,6 +265,42 @@ app.get("/api/admin/stats", auth(), adminOnly, async (_req, res) => {
 app.get("/api/admin/users", auth(), adminOnly, async (_req, res) => {
   const [rows] = await pool.query("SELECT id,name,email,role,created_at FROM users ORDER BY id");
   res.json(rows);
+});
+
+// ---------- Fallbacks ----------
+app.use((req, res) => res.status(404).json({ error: `Not found: ${req.method} ${req.originalUrl}` }));
+
+const DB_ERROR_CODES = new Set([
+  "ECONNREFUSED",
+  "ENOTFOUND",
+  "ETIMEDOUT",
+  "EHOSTUNREACH",
+  "ENETUNREACH",
+  "PROTOCOL_CONNECTION_LOST",
+  "ER_ACCESS_DENIED_ERROR",
+  "ER_BAD_DB_ERROR",
+  "ER_BAD_HOST_ERROR",
+  "POOL_CLOSED",
+]);
+
+// eslint-disable-next-line no-unused-vars -- Express identifies error middleware by arity
+app.use((err, _req, res, _next) => {
+  if (res.headersSent) return;
+  const code = err?.code || "";
+  if (err?.fatal || DB_ERROR_CODES.has(code)) {
+    console.error("[api] database error:", code || err?.message);
+    const missing = ["DB_HOST", "DB_USER", "DB_NAME"].filter((k) => !process.env[k]);
+    const hint = missing.length
+      ? `Missing environment variable(s): ${missing.join(", ")}. Set them in Vercel > Project > Settings > Environment Variables and redeploy.`
+      : "Check DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and DB_NAME in the deployment environment variables.";
+    return res.status(503).json({
+      error: `Database unavailable (${code || err?.message}). ${hint}`,
+      code: code || undefined,
+      missing: missing.length ? missing : undefined,
+    });
+  }
+  console.error("[api] unhandled error:", err);
+  res.status(500).json({ error: err?.message || "Internal server error" });
 });
 
 const port = process.env.PORT || 5000;

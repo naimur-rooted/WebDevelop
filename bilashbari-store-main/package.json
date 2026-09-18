@@ -3,12 +3,17 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "vite dev --port 5173",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "db:init": "node scripts/init-db.mjs",
+    "api:check": "node scripts/check-api.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

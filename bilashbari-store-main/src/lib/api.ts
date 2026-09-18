@@ -29,8 +29,23 @@ export async function api<T = any>(
   const t = token();
   if (t) headers.Authorization = `Bearer ${t}`;
   const res = await fetch(`${API}${path}`, { ...opts, headers });
+
   const text = await res.text();
-  const data = text ? JSON.parse(text) : null;
+  let data: any = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    // A non-JSON body means the request never reached the Express app
+    // (misrouted rewrite / platform error page). Surface something actionable
+    // instead of a bare "Unexpected token <" parser error.
+    if (!res.ok) {
+      throw new Error(
+        `API returned a non-JSON response (HTTP ${res.status}). ` +
+          `Check that the /api function is deployed and reachable at ${API}.`,
+      );
+    }
+  }
+
   if (!res.ok) throw new Error(data?.error || `Request failed: ${res.status}`);
   return data as T;
 }

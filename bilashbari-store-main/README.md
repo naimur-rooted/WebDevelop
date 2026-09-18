@@ -77,6 +77,12 @@ Create the MySQL database schema:
 mysql -u root -p < backend/schema.sql
 ```
 
+Or let the helper script do it (creates the database, applies the schema, lists the tables):
+
+```bash
+npm run db:init
+```
+
 ### 6. Run the app
 
 Start the backend server:
@@ -96,17 +102,75 @@ The frontend should be available at `http://localhost:5173` and the backend at `
 
 ## Deploy on Vercel
 
-1. Push this folder as the Vercel project root.
-2. Build command: `npm run build` (Nitro `vercel` preset, output is prebuilt).
-3. Set these environment variables in Vercel:
-   - `VITE_API_URL=/api` (frontend calls the same deployment)
-   - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
-   - `JWT_SECRET`
-   - `CORS_ORIGIN=https://<your-app>.vercel.app`
-4. Use an externally reachable MySQL host (Vercel functions cannot reach
-   `localhost`). PlanetScale, Aiven, Railway, or any MySQL 8+ host works —
-   import `backend/schema.sql` there first.
-5. API routes are served by `api/index.js` (`/api/*` → Express + `mysql2`).
+Vercel deploys this as **one project** (no separate frontend/backend projects). The
+TanStack Start SSR app and the Express API become two serverless functions.
+
+### 1. Project settings
+
+| Setting | Value |
+| --- | --- |
+| Framework Preset | `Other` (do **not** pick `Vite`) |
+| Root Directory | this folder (`bilashbari-store-main`) |
+| Build Command | `npm run build` |
+| Output Directory | leave **empty** (Nitro emits prebuilt `.vercel/output`) |
+| Install Command | `npm install` |
+| Node.js Version | `20.x` |
+
+### 2. Environment variables
+
+Set these for **Production** *and* **Preview**:
+
+```env
+VITE_API_URL=/api
+DB_HOST=<public mysql host>
+DB_PORT=3306
+DB_USER=<user>
+DB_PASSWORD=<password>
+DB_NAME=bilashbari
+JWT_SECRET=<long random string>
+CORS_ORIGIN=https://<your-app>.vercel.app
+```
+
+### 3. You need an externally reachable MySQL server
+
+Vercel functions **cannot** reach `127.0.0.1:3306` — that is the single most common
+cause of `connect ECONNREFUSED 127.0.0.1:3306` on a fresh deployment. Use any
+MySQL 8+ host that is reachable over the internet (Railway, Aiven, Clever Cloud,
+Hostinger, RDS, a VPS…), then load the schema once:
+
+```bash
+# from your machine, pointing at the hosted database
+DB_HOST=<host> DB_USER=<user> DB_PASSWORD=<pw> DB_NAME=bilashbari npm run db:init
+```
+
+Notes:
+
+- Vercel's own **Storage** (Postgres / KV / Blob) is *not* compatible — the code
+  uses `mysql2` only.
+- PlanetScale dropped its free MySQL tier; if you use a provider that forbids
+  `CREATE DATABASE`/`USE`, set `DB_CREATE_DATABASE=0` and create the database in
+  their console first.
+- Remember to whitelist `0.0.0.0/0` (or Vercel's egress IPs) in the DB firewall.
+
+### 4. Verify the deployment
+
+```bash
+npm run api:check -- https://<your-app>.vercel.app
+```
+
+`GET /api/health` should return `{"ok":true,"db":{"ok":true}}`. A `db.ok:false`
+value tells you the DB credentials are wrong or the host is unreachable, without
+needing the Vercel logs.
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `connect ECONNREFUSED 127.0.0.1:3306` | `DB_HOST` missing/unreadable, so `mysql2` falls back to `localhost` | Set `DB_HOST` (and friends) in Vercel env vars, then **redeploy** |
+| `504` on `/api/products`, `/api/categories` | async handler rejection was never forwarded to Express (older code); fixed by the `asyncSafe` wrapper in `backend/server.js` | update + redeploy |
+| `503 Database unavailable (ECONNREFUSED)` | Correct: the API failed fast and told you the DB is unreachable | check `DB_HOST` + DB firewall |
+| `API returned a non-JSON response (HTTP 404)` | Request never reached Express (rewrite/Root Directory wrong) | verify `vercel.json` rewrites and Root Directory |
+| Register works but `/admin` rejects you | account `role` is `user` | `UPDATE users SET role='admin' WHERE email='you@example.com';` |
 
 ## Notes for public repos
 

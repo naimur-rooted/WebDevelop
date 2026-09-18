@@ -1,0 +1,13 @@
+# Keep every text file LF in the repo and on checkout so formatting tools
+# (prettier, eslint) behave the same on Windows, macOS, Linux and CI.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text
+*.woff binary
+*.woff2 binary
+*.ttf binary
