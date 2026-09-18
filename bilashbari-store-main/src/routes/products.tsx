@@ -118,8 +118,9 @@ function Products() {
 
       {error && (
         <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
-          Couldn't reach the API. Start the backend at <code>backend/</code> and set{" "}
-          <code>VITE_API_URL</code>.
+          Couldn't load products: {(error as Error)?.message || "unknown error"}. If this is a
+          deployed site, check that the API has a reachable database configured -{" "}
+          <code>/api/health</code> reports the exact reason.
         </div>
       )}
 
