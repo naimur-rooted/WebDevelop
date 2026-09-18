@@ -5,46 +5,77 @@ import fs from "node:fs";
 import path from "node:path";
 import mysql from "mysql2/promise";
 
-if (!process.env.DB_HOST && fs.existsSync("backend/.env")) {
+const configured = () =>
+  !!(process.env.DB_HOST || process.env.MYSQL_URL || process.env.DATABASE_URL);
+
+// Backend/.env is the file the API itself reads, so inherit it and talk to
+// exactly the same server (MYSQL_URL / DB_SSL included).
+if (!configured() && fs.existsSync("backend/.env")) {
   for (const line of fs.readFileSync("backend/.env", "utf8").split(/\r?\n/)) {
     const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/i);
     if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
   }
 }
 
-const host = process.env.DB_HOST;
-if (!host) {
-  console.error("DB_HOST is not set. Copy backend/.env.example to backend/.env first.");
+if (!configured()) {
+  console.error(
+    "No database configured. Set DB_HOST (plus DB_PORT/DB_USER/DB_PASSWORD/DB_NAME)\n" +
+      "or a single MYSQL_URL in .env or backend/.env - see backend/.env.example.",
+  );
   process.exit(1);
 }
 
-const database = process.env.DB_NAME || "bilashbari";
-const sql = fs.readFileSync(path.join("backend", "schema.sql"), "utf8");
-const useDatabase = ["1", "true"].includes(String(process.env.DB_CREATE_DATABASE || "1"));
+// Reuse backend/db.js so MYSQL_URL, DB_SSL and the DB_* precedence rules behave
+// identically here and in the deployed API. Imported after the env is loaded
+// because db.js reads process.env while building its pool.
+const { poolConfig } = await import("../backend/db.js");
+const config = poolConfig();
 
-console.log(`Connecting to mysql://${process.env.DB_USER || "root"}@${host}:${process.env.DB_PORT || 3306}`);
+const host = config.host;
+const database = config.database;
+const useDatabase = ["1", "true"].includes(String(process.env.DB_CREATE_DATABASE || "1"));
+const collation = process.env.DB_COLLATION || "utf8mb4_unicode_ci";
+
+if (["localhost", "127.0.0.1", "::1"].includes(host)) {
+  console.warn(
+    `! ${host} is a loopback address. That only works if MySQL runs on this machine -\n` +
+      "  a Vercel function can never reach it. Point DB_HOST at a public host instead.\n",
+  );
+}
+
+console.log(
+  `Connecting to mysql://${config.user}@${host}:${config.port}${config.ssl ? " (TLS)" : ""}`,
+);
+
+// schema.sql pins utf8mb4_unicode_ci, which MySQL-compatible services (e.g. TiDB)
+// may not implement. DB_COLLATION lets those servers still import the schema.
+const sql = fs
+  .readFileSync(path.join("backend", "schema.sql"), "utf8")
+  .replaceAll("utf8mb4_unicode_ci", collation);
 
 // DATABASE()/CREATE DATABASE cannot be parameterised, so create it first with a
 // connection that has no default database selected.
 let conn;
 try {
   conn = await mysql.createConnection({
-    host,
-    port: Number(process.env.DB_PORT) || 3306,
-    user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "",
+    ...config,
     ...(useDatabase ? {} : { database }),
     multipleStatements: true,
     connectTimeout: 10000,
   });
 } catch (e) {
-  console.error(`\nCould not connect to ${host}:${Number(process.env.DB_PORT) || 3306} - ${e.code || e.message}`);
+  console.error(`\nCould not connect to ${host}:${config.port} - ${e.code || e.message}`);
   if (e.code === "ECONNREFUSED") {
     console.error("Nothing is listening there. Start MySQL locally, or point DB_HOST at a reachable host.");
   } else if (e.code === "ER_ACCESS_DENIED_ERROR") {
     console.error("Check DB_USER and DB_PASSWORD.");
   } else if (e.code === "ENOTFOUND") {
     console.error("The hostname does not resolve - check DB_HOST for typos.");
+  } else if (/self[- ]signed|unable to verify|CERT_|certificate/i.test(String(e.message))) {
+    console.error(
+      "The TLS certificate was rejected. If the provider uses a private CA set DB_SSL_NO_VERIFY=true,\n" +
+        "otherwise the server does not expect TLS - drop DB_SSL=true.",
+    );
   }
   process.exit(1);
 }
@@ -52,7 +83,7 @@ try {
 try {
   if (useDatabase) {
     await conn.query(
-      `CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+      `CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE ${collation}`,
     );
     await conn.query(`USE \`${database}\``);
   }
@@ -73,6 +104,8 @@ try {
   console.error(`\nSchema import failed: ${e.code || e.message}`);
   if (e.code === "ER_DBACCESS_DENIED_ERROR" || e.code === "ER_TABLEACCESS_DENIED_ERROR") {
     console.error("This MySQL user cannot create databases. Set DB_CREATE_DATABASE=0 and create it in the provider console first.");
+  } else if (e.code === "ER_UNKNOWN_COLLATION" || /unknown collation/i.test(String(e.message))) {
+    console.error(`This server does not support ${collation}. Retry with DB_COLLATION=utf8mb4_general_ci.`);
   }
   process.exitCode = 1;
 } finally {

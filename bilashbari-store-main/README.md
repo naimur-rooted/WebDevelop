@@ -131,26 +131,67 @@ JWT_SECRET=<long random string>
 CORS_ORIGIN=https://<your-app>.vercel.app
 ```
 
+Optional (only if your provider needs them):
+
+```env
+DB_SSL=true              # managed MySQL almost always requires TLS
+DB_SSL_NO_VERIFY=true    # provider uses a private CA Node does not trust
+DB_CREATE_DATABASE=0     # the user may not run CREATE DATABASE
+DB_COLLATION=utf8mb4_general_ci   # MySQL-compatible servers that reject utf8mb4_unicode_ci
+# MYSQL_URL=mysql://user:pw@host:3306/bilashbari?ssl-mode=REQUIRED   # single-string alternative
+```
+
 ### 3. You need an externally reachable MySQL server
 
 Vercel functions **cannot** reach `127.0.0.1:3306` — that is the single most common
-cause of `connect ECONNREFUSED 127.0.0.1:3306` on a fresh deployment. Use any
-MySQL 8+ host that is reachable over the internet (Railway, Aiven, Clever Cloud,
-Hostinger, RDS, a VPS…), then load the schema once:
+cause of `connect ECONNREFUSED 127.0.0.1:3306` on a fresh deployment. Vercel's own
+**Storage** (Postgres / KV / Blob) is *not* usable here: the code talks `mysql2`
+to a MySQL server and nothing else.
 
-```bash
-# from your machine, pointing at the hosted database
-DB_HOST=<host> DB_USER=<user> DB_PASSWORD=<pw> DB_NAME=bilashbari npm run db:init
-```
+Pick any MySQL 8+ host reachable over the internet:
+
+| Provider | Cost | Notes |
+| --- | --- | --- |
+| **Aiven for MySQL (free tier)** | free, no credit card, no time limit | **best fit.** Real MySQL 8, 1 vCPU / 1 GB RAM / 1 GB disk, `max_connections` 76, reachable from anywhere because its IP filter defaults to `0.0.0.0/0`. Only one free service per service type |
+| TiDB Cloud Starter | free | 5 GiB + 50M request units/month, MySQL-*compatible*. TLS is mandatory, port is `4000` and the username is prefixed with the instance id (`3pTAoNNegb47Uc8.root`). Set `DB_COLLATION=utf8mb4_general_ci` if `utf8mb4_unicode_ci` is rejected |
+| Railway | paid (trial credit) | easiest UI, no longer genuinely free |
+| cPanel shared hosting (Hostinger, Namecheap…) | cheap, paid | MySQL exists but you must enable *Remote MySQL* and add `%` as an allowed host |
+| Amazon RDS / Azure / a VPS | paid | full control, most setup |
+
+#### Aiven free-tier walkthrough (no credit card)
+
+1. Sign up at [aiven.io](https://aiven.io) and create a project.
+2. **Create service** → `MySQL` → plan **Free** → pick the cloud/region closest to
+   your users (the free plan does not let you choose a specific cloud).
+3. Wait for the service state to become **Running**, then open its **Overview**
+   page. You need `Host`, `Port`, `User` (usually `avnadmin`) and `Password`.
+4. Leave **Service settings → Cloud and network → IP filter** at `0.0.0.0/0` —
+   Aiven needs all inbound IPs allowed because Vercel functions have no fixed
+   outbound IPs.
+5. Import the schema from your machine:
+
+   ```bash
+   DB_HOST=<host> DB_PORT=<port> DB_USER=avnadmin DB_PASSWORD=<pw> \
+   DB_NAME=bilashbari DB_SSL=true npm run db:init
+   ```
+
+6. Put the same values into the Vercel environment variables from step 2, then
+   redeploy.
 
 Notes:
 
-- Vercel's own **Storage** (Postgres / KV / Blob) is *not* compatible — the code
-  uses `mysql2` only.
-- PlanetScale dropped its free MySQL tier; if you use a provider that forbids
-  `CREATE DATABASE`/`USE`, set `DB_CREATE_DATABASE=0` and create the database in
-  their console first.
-- Remember to whitelist `0.0.0.0/0` (or Vercel's egress IPs) in the DB firewall.
+- **TLS:** managed providers require it. Set `DB_SSL=true`, or use a single
+  `MYSQL_URL=mysql://avnadmin:pw@host:port/bilashbari?ssl-mode=REQUIRED`. If the
+  provider uses a private CA and Node rejects the chain, add
+  `DB_SSL_NO_VERIFY=true` (or install their CA).
+- **No `CREATE DATABASE` permission?** Set `DB_CREATE_DATABASE=0` and create the
+  database in the provider console first; the script then only applies the schema.
+- **`Unknown collation`?** `schema.sql` uses `utf8mb4_unicode_ci`. MySQL 8 supports
+  it; some MySQL-compatible servers do not. Retry with `DB_COLLATION=utf8mb4_general_ci`.
+- **Whitelist remote access:** if the provider has a firewall/allow-list, allow
+  `0.0.0.0/0` (or the Vercel egress IPs) otherwise you get `ECONNREFUSED`/timeouts.
+- Copy `backend/.env.example` to `backend/.env` and fill it in to keep the same
+  settings locally — `npm run db:check` prints exactly what the API will resolve.
 
 ### 4. Verify the deployment
 
@@ -177,6 +218,11 @@ that is still a loopback address.
 | `connect ECONNREFUSED 127.0.0.1:3306` | `DB_HOST` missing in the deployment, so `mysql2` falls back to `localhost` | Set `DB_HOST` (and friends) in Vercel env vars, then **redeploy** |
 | `504` on `/api/products`, `/api/categories` | async handler rejection was never forwarded to Express (older code); fixed by the `asyncSafe` wrapper in `backend/server.js` | update + redeploy |
 | `503 Database unavailable (ECONNREFUSED)` | Correct: the API failed fast and told you the DB is unreachable instead of hanging until the 10s function timeout | check `DB_HOST` + the DB firewall/allowlist |
+| `503 Database unavailable (ENOTFOUND)` | the DB hostname does not resolve | typo in `DB_HOST`; some providers also give an internal-only hostname — use the public one |
+| `503 Database unavailable (ER_ACCESS_DENIED_ERROR)` | wrong `DB_USER`/`DB_PASSWORD`, or the user is not allowed in from your IP | re-copy the credentials; allow `0.0.0.0/0` in the provider firewall |
+| TLS / certificate error, or `HANDSHAKE` on the DB | managed MySQL requires TLS (or uses a private CA) | set `DB_SSL=true`; if it still fails add `DB_SSL_NO_VERIFY=true` |
+| `Unknown collation: utf8mb4_unicode_ci` while importing | MySQL-compatible server that lacks that collation | `DB_COLLATION=utf8mb4_general_ci npm run db:init` |
+| `ER_DBACCESS_DENIED_ERROR` while importing | the user may not run `CREATE DATABASE` | create the DB in the provider console, then `DB_CREATE_DATABASE=0 npm run db:init` |
 | `API returned a non-JSON response (HTTP 404)` | Request never reached Express (rewrite/Root Directory wrong) | verify `vercel.json` rewrites and Root Directory |
 | `API returned a non-JSON response (HTTP 500)` | The `/api` function crashed before Express replied (usually a bad env var) | check `JWT_SECRET` is set, then the function logs |
 | Register works but `/admin` rejects you | account `role` is `user` | `UPDATE users SET role='admin' WHERE email='you@example.com';` |
