@@ -211,6 +211,77 @@ npm run db:check    # prints the resolved host/port/db and probes the connection
 exactly what `backend/db.js` will use at runtime — useful for spotting a `DB_HOST`
 that is still a loopback address.
 
+## Alternative: API on Render, frontend on Vercel
+
+Vercel never asks whether you are deploying a frontend or a backend — **one project
+deploys both**. If you would rather run the API as a normal long-lived Node process
+(no 10s serverless limit, plain logs, one always-on server), you can keep the
+frontend on Vercel and host `backend/` on [Render](https://render.com).
+
+> **Render cannot host MySQL.** Its managed storage is Postgres and Key Value only,
+> and free web services have no persistent disks, so a self-hosted MySQL container
+> on Render is not an option either. You still need an external MySQL host (Aiven /
+> TiDB / Railway / RDS) from the section above — Render only replaces the `/api`
+> serverless function, it does not solve the database problem.
+
+### 1. Create the Render web service
+
+| Setting | Value |
+| --- | --- |
+| Type | Web Service |
+| Repository | this repo (`WebDevelop`) |
+| Root Directory | `bilashbari-store-main/backend` |
+| Runtime | Node |
+| Build Command | `npm install` |
+| Start Command | `npm start` (`node server.js`) |
+| Health Check Path | `/api/health` |
+| Instance Type | Free (spins down when idle — expect a cold start of roughly a minute) |
+
+`backend/server.js` listens on `process.env.PORT` and binds every interface, so
+Render's default port works unchanged. Add `PORT=10000` explicitly if the deploy
+log shows the service never becoming healthy.
+
+### 2. Render environment variables
+
+```env
+PORT=10000
+DB_HOST=<public mysql host>
+DB_PORT=3306
+DB_USER=<user>
+DB_PASSWORD=<password>
+DB_NAME=bilashbari
+DB_SSL=true
+JWT_SECRET=<long random string>
+CORS_ORIGIN=https://<your-app>.vercel.app,https://*.vercel.app
+```
+
+`CORS_ORIGIN` takes a comma separated list and supports `*` wildcards inside an
+entry, so Vercel preview deployments keep working without editing the variable for
+every build. A lone `*` allows every origin — fine for a first smoke test, not for
+anything public.
+
+### 3. Point the frontend at Render
+
+In Vercel → Settings → Environment Variables set the **absolute** URL, then redeploy:
+
+```env
+VITE_API_URL=https://<your-service>.onrender.com/api
+```
+
+`VITE_API_URL` is inlined during `vite build`, so the frontend must be rebuilt
+(redeployed) for a change to take effect. Set it back to `/api` — or delete it — to
+return to the Vercel function; `src/lib/api.ts` falls back to the same-origin `/api`
+path automatically.
+
+### 4. Verify
+
+```bash
+npm run api:check -- https://<your-service>.onrender.com
+```
+
+On Render the health response reports `"render":true, "vercel":false`, so the body
+alone tells you which host answered the request.
+
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
@@ -225,6 +296,9 @@ that is still a loopback address.
 | `ER_DBACCESS_DENIED_ERROR` while importing | the user may not run `CREATE DATABASE` | create the DB in the provider console, then `DB_CREATE_DATABASE=0 npm run db:init` |
 | `API returned a non-JSON response (HTTP 404)` | Request never reached Express (rewrite/Root Directory wrong) | verify `vercel.json` rewrites and Root Directory |
 | `API returned a non-JSON response (HTTP 500)` | The `/api` function crashed before Express replied (usually a bad env var) | check `JWT_SECRET` is set, then the function logs |
+| `Failed to fetch` / `blocked by CORS policy` after moving the API to another host | the browser calls a different origin, so CORS applies | add that origin to `CORS_ORIGIN` on the API host (wildcards like `https://*.vercel.app` are supported), then restart/redeploy it |
+| Edited `VITE_API_URL` but the frontend still calls the old URL | the value is inlined at build time | trigger a new Vercel deployment; a runtime env change alone has no effect |
+| First request to a Render free service takes ~1 minute | free web services spin down when idle | expected cold start; keep the API on the Vercel function or use a paid instance |
 | Register works but `/admin` rejects you | account `role` is `user` | `UPDATE users SET role='admin' WHERE email='you@example.com';` |
 
 Status codes the API uses on purpose: `400` missing fields, `401` bad credentials/token,

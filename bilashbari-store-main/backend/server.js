@@ -23,9 +23,35 @@ for (const method of ["get", "post", "put", "patch", "delete", "all"]) {
   app[method] = (path, ...handlers) => original(path, ...handlers.map(asyncSafe));
 }
 
-app.get("/api/health", async (_req, res) => res.json({ ok: true, db: await dbStatus(), vercel: !!process.env.VERCEL }));
-app.use(cors({ origin: process.env.CORS_ORIGIN?.split(",") || "*" }));
+/**
+ * CORS_ORIGIN accepts one or more origins, comma separated. A literal "*" as the
+ * whole value allows every origin (handy for quick tests). Individual entries may
+ * use "*" as a wildcard so Vercel preview deployments keep working after the
+ * backend is hosted on another platform (e.g. https://*.vercel.app).
+ * Exported so the allowed-origin rules can be tested without a live server.
+ */
+export function corsOrigin() {
+  const raw = (process.env.CORS_ORIGIN || "*")
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+  if (raw.length === 0 || raw.includes("*")) return "*";
+  return raw.map((value) =>
+    value.includes("*")
+      ? new RegExp(`^${value.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*")}$`)
+      : value,
+  );
+}
+
+// Middleware must be registered before any route, otherwise the route answers
+// without CORS headers and a browser fetch from another origin fails — which is
+// exactly the case when the frontend stays on Vercel and the API runs elsewhere.
+app.use(cors({ origin: corsOrigin() }));
 app.use(express.json());
+
+app.get("/api/health", async (_req, res) =>
+  res.json({ ok: true, db: await dbStatus(), vercel: !!process.env.VERCEL, render: !!process.env.RENDER }),
+);
 
 const sign = (u) => {
   const secret = process.env.JWT_SECRET;
