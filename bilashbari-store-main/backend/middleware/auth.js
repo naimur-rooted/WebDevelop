@@ -8,8 +8,12 @@ export function auth(required = true) {
       if (!required) return next();
       return res.status(401).json({ error: "Unauthorized" });
     }
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      return res.status(500).json({ error: "Server misconfigured: JWT_SECRET is missing" });
+    }
     try {
-      req.user = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = jwt.verify(token, secret);
       next();
     } catch {
       return res.status(401).json({ error: "Invalid token" });

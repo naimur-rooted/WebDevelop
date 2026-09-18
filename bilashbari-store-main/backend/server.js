@@ -7,13 +7,19 @@ import { pool } from "./db.js";
 import { auth, adminOnly } from "./middleware/auth.js";
 
 const app = express();
+app.get("/api/health", (_req, res) => res.json({ ok: true }));
 app.use(cors({ origin: process.env.CORS_ORIGIN?.split(",") || "*" }));
 app.use(express.json());
 
-const sign = (u) =>
-  jwt.sign({ id: u.id, role: u.role, name: u.name, email: u.email }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
-  });
+const sign = (u) => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error("JWT_SECRET is not set");
+  return jwt.sign(
+    { id: u.id, role: u.role, name: u.name, email: u.email },
+    secret,
+    { expiresIn: "7d" },
+  );
+};
 
 // ---------- Auth ----------
 app.post("/api/auth/register", async (req, res) => {
@@ -245,4 +251,8 @@ app.get("/api/admin/users", auth(), adminOnly, async (_req, res) => {
 });
 
 const port = process.env.PORT || 5000;
-app.listen(port, () => console.log(`Bilashbari API running on http://localhost:${port}`));
+if (process.env.VERCEL !== "1") {
+  app.listen(port, () => console.log(`Bilashbari API running on http://localhost:${port}`));
+}
+
+export default app;
