@@ -14,7 +14,7 @@ for (const line of [`${process.cwd()}/.env`, `${process.cwd()}/backend/.env`]) {
   }
 }
 
-const { poolConfig, dbStatus } = await import("../backend/db.js");
+const { poolConfig, dbStatus } = await import("../db.js");
 const cfg = poolConfig();
 const mask = (v) => (v ? `${String(v).slice(0, 2)}***` : "(empty)");
 

@@ -3,6 +3,7 @@
 import "dotenv/config";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import mysql from "mysql2/promise";
 
 const configured = () =>
@@ -28,7 +29,7 @@ if (!configured()) {
 // Reuse backend/db.js so MYSQL_URL, DB_SSL and the DB_* precedence rules behave
 // identically here and in the deployed API. Imported after the env is loaded
 // because db.js reads process.env while building its pool.
-const { poolConfig } = await import("../backend/db.js");
+const { poolConfig } = await import("../db.js");
 const config = poolConfig();
 
 const host = config.host;
@@ -50,7 +51,7 @@ console.log(
 // schema.sql pins utf8mb4_unicode_ci, which MySQL-compatible services (e.g. TiDB)
 // may not implement. DB_COLLATION lets those servers still import the schema.
 const sql = fs
-  .readFileSync(path.join("backend", "schema.sql"), "utf8")
+  .readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "schema.sql"), "utf8")
   .replaceAll("utf8mb4_unicode_ci", collation);
 
 // DATABASE()/CREATE DATABASE cannot be parameterised, so create it first with a
@@ -59,7 +60,7 @@ let conn;
 try {
   conn = await mysql.createConnection({
     ...config,
-    ...(useDatabase ? {} : { database }),
+    ...(useDatabase ? { database: undefined } : { database }),
     multipleStatements: true,
     connectTimeout: 10000,
   });
