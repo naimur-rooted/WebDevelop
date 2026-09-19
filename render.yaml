@@ -1,4 +1,5 @@
-# One blueprint file for BOTH services. Render reads this on "New -> Blueprint".
+# One blueprint file for BOTH services. Render reads this at the REPO ROOT on
+# "New -> Blueprint" (repo root = WebDevelop/, app = bilashbari-store-main/).
 # Storage note: do NOT create a Render Postgres/Key Value instance - this
 # project uses external MySQL (Aiven). Only the two services below are needed.
 services:
@@ -6,7 +7,7 @@ services:
   - type: web
     name: bilashbari-api
     runtime: node
-    rootDir: backend
+    rootDir: bilashbari-store-main/backend
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /api/health
@@ -37,11 +38,13 @@ services:
   - type: web
     name: bilashbari-web
     runtime: static
-    rootDir: frontend
+    rootDir: bilashbari-store-main/frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     pullRequestPreviewsEnabled: true
     envVars:
+      - key: NODE_VERSION
+        value: "20"
       # Value = the bilashbari-api service's public URL + /api
       - key: VITE_API_URL
         sync: false

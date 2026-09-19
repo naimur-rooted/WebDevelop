@@ -1,0 +1,80 @@
+/*
+  CSS SELECTOR BASICS
+  A selector chooses which HTML element(s) a CSS rule will style.
+*/
+
+/* Universal selector: * selects EVERY element on the page. */
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+/* Element selector: p selects every <p> element. */
+p {
+  color: #334155;
+  line-height: 1.6;
+  margin-top: 0.6rem;
+}
+
+/* Grouping selector: h1, h2, and h3 share these styles. */
+h1,
+h2,
+h3 {
+  color: #1e3a8a;
+}
+
+body {
+  background-color: #f8fafc;
+  font-family: Arial, sans-serif;
+  padding: 2rem;
+}
+
+.page-container {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgb(15 23 42 / 12%);
+  margin: auto;
+  max-width: 760px;
+  padding: 2rem;
+}
+
+.intro {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.example-section {
+  border-top: 1px solid #cbd5e1;
+  padding: 1.25rem 0;
+}
+
+/* Class selector: .highlight selects every element with class="highlight". */
+.highlight {
+  background-color: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  padding: 0.5rem 0.75rem;
+}
+
+/* ID selector: #important-note selects the one element with this unique id. */
+#important-note {
+  background-color: #fee2e2;
+  border: 1px solid #ef4444;
+  border-radius: 6px;
+  color: #991b1b;
+  font-weight: bold;
+  padding: 0.75rem;
+}
+
+/* Attribute selector: selects only links whose target attribute is "_blank". */
+a[target="_blank"] {
+  color: #047857;
+  font-weight: bold;
+}
+
+/* Styling code tags makes the selector names in the examples easier to spot. */
+code {
+  background-color: #e2e8f0;
+  border-radius: 3px;
+  color: #0f172a;
+  padding: 0.1rem 0.3rem;
+}

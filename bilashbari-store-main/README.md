@@ -3,11 +3,16 @@
 Plants, tools & garden essentials storefront. Plain **Vite SPA (React + TanStack Router)** frontend, **Express + MySQL** backend.
 
 ```
-bilashbari-store-main/
-├── frontend/   # Vite SPA  -> deploy as Render Static Site (or any static host)
-├── backend/    # Express + mysql2 -> deploy as Render Web Service
-└── render.yaml # Blueprint that creates both services at once
+WebDevelop/                  <- repo root (Render Blueprint reads render.yaml here)
+├── render.yaml              # Blueprint: creates BOTH services at once
+└── bilashbari-store-main/
+    ├── frontend/            # Vite SPA -> deploy as Render Static Site (or any static host)
+    └── backend/             # Express + mysql2 -> deploy as Render Web Service
 ```
+
+> Manual setup: every path below is relative to `bilashbari-store-main/`,
+> but Render's **Root Directory** must include that folder, e.g.
+> `bilashbari-store-main/frontend` (repo root is the parent).
 
 ## Deploy on Render (recommended structure)
 
